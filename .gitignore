@@ -14,10 +14,11 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
+.vscode/
 
 ### NetBeans ###
 /nbproject/private/
@@ -32,6 +33,13 @@ build/
 ### VS Code ###
 .vscode/
 
+# OS
+.DS_Store
+Thumbs.db
 
 application.properties
+application-local.properties
 application-prod.properties
+
+# Logs
+.log
