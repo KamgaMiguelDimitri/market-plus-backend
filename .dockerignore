@@ -1,0 +1,15 @@
+
+---
+
+## `.dockerignore` — racine du projet
+```
+.git
+.github
+.gitignore
+.mvn/wrapper/maven-wrapper.jar
+target/
+*.md
+*.iml
+.idea/
+*.log
+application-local.properties
