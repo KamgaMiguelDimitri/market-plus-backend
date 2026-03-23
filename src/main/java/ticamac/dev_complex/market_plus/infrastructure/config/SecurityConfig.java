@@ -3,7 +3,6 @@ package ticamac.dev_complex.market_plus.infrastructure.config;
 import ticamac.dev_complex.market_plus.infrastructure.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,7 +15,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // active @PreAuthorize sur les controllers
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -32,14 +31,19 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // --- Routes publiques ---
+                        // ── Publiques ───────────────────────────────
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/products/**",
                                 "/api/categories/**")
                         .permitAll()
 
-                        // --- Routes client connecté ---
+                        // ── Webhooks — appelés par Stripe/MoMo sans token ──
+                        .requestMatchers(
+                                "/api/payments/webhooks/**")
+                        .permitAll()
+
+                        // ── Client connecté ─────────────────────────
                         .requestMatchers(
                                 "/api/cart/**",
                                 "/api/orders/**",
@@ -47,15 +51,14 @@ public class SecurityConfig {
                                 "/api/payments/**")
                         .hasAnyRole("CUSTOMER", "ADMIN", "SUPERADMIN")
 
-                        // --- Routes admin ---
+                        // ── Admin ───────────────────────────────────
                         .requestMatchers("/api/admin/**")
                         .hasAnyRole("ADMIN", "SUPERADMIN")
 
-                        // --- Routes super-admin uniquement ---
+                        // ── Super-Admin ─────────────────────────────
                         .requestMatchers("/api/superadmin/**")
                         .hasRole("SUPERADMIN")
 
-                        // Tout le reste → authentifié
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -29,14 +29,18 @@ public class AuthService implements AuthUseCase {
         this.jwtService = jwtService;
     }
 
+    
     @Override
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        // ✅ Normaliser EN PREMIER avant tout appel
+        String email = request.getEmail().toLowerCase().trim();
+
+        if (userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Un compte existe déjà avec cet email.");
         }
 
         User user = new User();
-        user.setEmail(request.getEmail().toLowerCase().trim());
+        user.setEmail(email); // ← utiliser la variable normalisée
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
@@ -46,7 +50,6 @@ public class AuthService implements AuthUseCase {
         user.setCreatedAt(OffsetDateTime.now());
 
         User saved = userRepository.save(user);
-
         String token = jwtService.generateToken(saved);
 
         return new AuthResponse(
@@ -58,9 +61,13 @@ public class AuthService implements AuthUseCase {
                 saved.getRole().name());
     }
 
+
     @Override
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
+        // ✅ Normaliser EN PREMIER
+        String email = request.getEmail().toLowerCase().trim();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Email ou mot de passe incorrect."));
 
         if (!user.isActive()) {
