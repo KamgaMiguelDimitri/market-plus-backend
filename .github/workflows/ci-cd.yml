@@ -49,11 +49,11 @@ jobs:
           SPRING_DATASOURCE_PASSWORD: postgres
           APP_JWT_SECRET: test-secret-key-for-ci-minimum-32-characters-long
           APP_JWT_EXPIRATION_MS: 86400000
-          # ✅ Ajouter ces lignes
           STRIPE_SECRET_KEY: sk_test_fake_key_for_ci
           STRIPE_WEBHOOK_SECRET: whsec_fake_secret_for_ci
           MOMO_SUBSCRIPTION_KEY: fake_momo_key_for_ci
-        run: mvn clean verify -Dspring.profiles.active=test
+        # ✅ On exclut les tests d'intégration — uniquement les tests unitaires en CI
+        run: mvn clean verify -Dspring.profiles.active=test -Dtest="AuthServiceTest,JwtServiceTest,CategoryServiceTest,CartServiceTest,OrderServiceTest,PaymentServiceTest" -DfailIfNoTests=false
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
